@@ -7,7 +7,12 @@
 void printPrompt() { printf("Scratch > "); }
 
 int main(int argc, char* argv[]) {
-    Table* table = createTable();
+    if (argc < 2) {
+        printf("Must give a filename for the DB.\n");
+        exit(1);
+    }
+
+    table* table = dbOpen(argv[1]);
     inputBuffer* inputBfr = inputBufferCreate();
     while (1) {
         printPrompt();
@@ -48,16 +53,16 @@ int main(int argc, char* argv[]) {
             continue;
         }
         ExecuteResult er = executeStatement(&statement, table);
-        switch(er){
-            case EXECUTE_SUCCESS:
-                printf("Executed.\n");
-                break;
-            case EXECUTE_TABLE_FULL:
-                printf("Table is full.\n");
-                break;
-            case EXECUTE_FAIL:
-                printf("Execute Failed.\n");
-                break;
+        switch (er) {
+        case EXECUTE_SUCCESS:
+            printf("Executed.\n");
+            break;
+        case EXECUTE_TABLE_FULL:
+            printf("Table is full.\n");
+            break;
+        case EXECUTE_FAIL:
+            printf("Execute Failed.\n");
+            break;
         }
     }
     return 0;

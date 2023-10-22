@@ -22,10 +22,16 @@ typedef struct statement {
     Row row;
 } statement;
 
-typedef struct Table {
-    int numRows;
+typedef struct pager {
+    int fileDescriptor;
+    uint32_t fileLen;
     void* pages[TABLE_MAX_PAGES];
-} Table;
+} pager;
+
+typedef struct table {
+    int numRows;
+    pager* pager;
+} table;
 
 typedef enum ExecuteResult {
     EXECUTE_SUCCESS,
@@ -51,12 +57,16 @@ typedef enum {
 void serializeRow(Row* src, void* dest);
 
 void deserializeRow(void* src, Row* dest);
-MetaCommandResult metaCommand(inputBuffer* inputBfr, Table* table);
+MetaCommandResult metaCommand(inputBuffer* inputBfr, table* table);
 
 PrepareResult prepareStatement(inputBuffer* inputBfr, statement* smt);
 
-ExecuteResult executeStatement(statement* smt, Table* table);
+ExecuteResult executeStatement(statement* smt, table* table);
 
-void freeTable(Table* table);
+pager* pagerOpen(const char* filename);
+void* getPage(pager* pager, uint32_t pageNum);
+void pagerFlush(pager* pg, uint32_t idx, uint32_t size);
 
-Table* createTable();
+void dbClose(table* table);
+
+table* dbOpen(const char* filename);
